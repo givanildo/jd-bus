@@ -11,10 +11,6 @@ def check_git_installed():
         print("Erro: Git não encontrado. Por favor, instale o Git primeiro.")
         return False
 
-def check_repo_exists():
-    """Verifica se já existe um repositório git"""
-    return os.path.exists(".git")
-
 def configure_git():
     """Configura credenciais do Git"""
     try:
@@ -25,6 +21,31 @@ def configure_git():
         print(f"Erro ao configurar Git: {e}")
         return False
 
+def prepare_repo():
+    """Prepara repositório para publicação"""
+    try:
+        # Atualiza .gitignore
+        with open('.gitignore', 'w') as f:
+            f.write("""
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Outros
+.DS_Store
+            """)
+        return True
+    except Exception as e:
+        print(f"Erro ao preparar repositório: {e}")
+        return False
+
 def publish_repo():
     """Publica o repositório no GitHub"""
     try:
@@ -33,13 +54,15 @@ def publish_repo():
             
         print("\nPublicando projeto no GitHub...")
         
-        # Configura Git se necessário
-        if not check_repo_exists():
-            configure_git()
-            
-            # Inicializa repositório
-            subprocess.run(["git", "init"], check=True)
-            
+        # Configura Git
+        configure_git()
+        
+        # Prepara repositório
+        prepare_repo()
+        
+        # Inicializa repositório
+        subprocess.run(["git", "init"], check=True)
+        
         # Adiciona arquivos
         subprocess.run(["git", "add", "."], check=True)
         
@@ -52,28 +75,15 @@ def publish_repo():
         subprocess.run(["git", "branch", "-M", "main"], check=True)
         
         # Adiciona remote
-        try:
-            subprocess.run([
-                "git", "remote", "add", "origin", 
-                "https://github.com/givanildo/jd-bus.git"
-            ], check=True)
-        except:
-            # Remote já pode existir
-            pass
-            
+        subprocess.run([
+            "git", "remote", "add", "origin", 
+            "https://github.com/givanildo/jd-bus.git"
+        ], check=True)
+        
         # Push
         print("\nEnviando para GitHub...")
-        result = subprocess.run([
-            "git", "push", "-u", "origin", "main"
-        ], capture_output=True, text=True)
+        subprocess.run(["git", "push", "-u", "origin", "main"], check=True)
         
-        if "Authentication failed" in result.stderr:
-            print("\nErro de autenticação. Por favor:")
-            print("1. Acesse https://github.com/settings/tokens")
-            print("2. Gere um novo token com permissão 'repo'")
-            print("3. Use o token como senha ao fazer push")
-            return False
-            
         print("\nProjeto publicado com sucesso!")
         print("Acesse: https://github.com/givanildo/jd-bus")
         return True
