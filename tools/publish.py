@@ -60,19 +60,28 @@ def publish_repo():
         # Prepara repositório
         prepare_repo()
         
-        # Inicializa repositório
-        subprocess.run(["git", "init"], check=True)
+        # Verifica se já é um repositório git
+        is_git_repo = os.path.exists(".git")
+        if not is_git_repo:
+            # Inicializa repositório
+            subprocess.run(["git", "init"], check=True)
         
         # Adiciona arquivos
         subprocess.run(["git", "add", "."], check=True)
         
         # Commit
         subprocess.run([
-            "git", "commit", "-m", "Primeira versão do Monitor CAN Bus John Deere"
+            "git", "commit", "-m", "Atualização do Monitor CAN Bus John Deere"
         ], check=True)
         
         # Configura branch principal
         subprocess.run(["git", "branch", "-M", "main"], check=True)
+        
+        # Remove remote origin se existir
+        try:
+            subprocess.run(["git", "remote", "remove", "origin"], check=True)
+        except:
+            pass
         
         # Adiciona remote
         subprocess.run([
@@ -82,7 +91,7 @@ def publish_repo():
         
         # Push
         print("\nEnviando para GitHub...")
-        subprocess.run(["git", "push", "-u", "origin", "main"], check=True)
+        subprocess.run(["git", "push", "-f", "origin", "main"], check=True)
         
         print("\nProjeto publicado com sucesso!")
         print("Acesse: https://github.com/givanildo/jd-bus")
