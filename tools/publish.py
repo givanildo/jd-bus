@@ -69,10 +69,20 @@ def publish_repo():
         # Adiciona arquivos
         subprocess.run(["git", "add", "."], check=True)
         
-        # Commit
-        subprocess.run([
-            "git", "commit", "-m", "Atualização do Monitor CAN Bus John Deere"
-        ], check=True)
+        # Verifica se há mudanças para commitar
+        status = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            text=True
+        ).stdout.strip()
+        
+        if status:  # Se há mudanças
+            # Commit
+            subprocess.run([
+                "git", "commit", "-m", "Atualização do Monitor CAN Bus John Deere"
+            ], check=True)
+        else:
+            print("\nNenhuma mudança detectada para commitar")
         
         # Configura branch principal
         subprocess.run(["git", "branch", "-M", "main"], check=True)
